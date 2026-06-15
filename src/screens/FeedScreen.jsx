@@ -93,16 +93,7 @@ export default function FeedScreen({ posts, onLike, onSave }) {
         )}
       </div>
 
-      {/* Footer note */}
-      <div style={{
-        textAlign: 'center',
-        padding: '8px 20px 20px',
-        fontSize: 11,
-        color: '#c4b5ab',
-        lineHeight: 1.5,
-      }}>
-        🌿 Canopy is for adults 21+ or medical patients only. Community &amp; education — no sales or transactions.
-      </div>
+      <div style={{ paddingBottom: 8 }} />
     </div>
   )
 }

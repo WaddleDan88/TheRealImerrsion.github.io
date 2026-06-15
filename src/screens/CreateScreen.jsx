@@ -1,25 +1,25 @@
-import { useState } from 'react'
-import { TAG_CONFIG, currentUser, USERS } from '../data/mockData'
+import { useState, useRef } from 'react'
+import { TAG_CONFIG, currentUser } from '../data/mockData'
 
 const TAGS = ['Medical', 'Recreational', 'Science', 'Benefits', 'Pride', 'StrainReview']
-
-const PLACEHOLDER_IMAGES = [
-  'https://images.unsplash.com/photo-1536819114556-1e10f967fb61?w=600&q=80',
-  'https://images.unsplash.com/photo-1603909517613-8d06d3a44a65?w=600&q=80',
-  'https://images.unsplash.com/photo-1574539602932-f4ba7a4d009e?w=600&q=80',
-  'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',
-  'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&q=80',
-]
 
 export default function CreateScreen({ onPost }) {
   const [tag, setTag] = useState('')
   const [caption, setCaption] = useState('')
-  const [selectedImg, setSelectedImg] = useState(null)
+  const [imageUrl, setImageUrl] = useState(null)
   const [source, setSource] = useState('')
   const [strain, setStrain] = useState({ name: '', type: 'Hybrid', thc: '', cbd: '', effects: '', flavors: '', rating: 4 })
   const [submitted, setSubmitted] = useState(false)
+  const fileRef = useRef()
 
-  const canPost = tag && caption.trim() && selectedImg !== null
+  const canPost = tag && caption.trim() && imageUrl
+
+  function handleFileChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const url = URL.createObjectURL(file)
+    setImageUrl(url)
+  }
 
   function handleSubmit() {
     if (!canPost) return
@@ -28,7 +28,7 @@ export default function CreateScreen({ onPost }) {
       id: 'p' + Date.now(),
       userId: currentUser.id,
       tag,
-      image: PLACEHOLDER_IMAGES[selectedImg],
+      image: imageUrl,
       caption,
       likes: 0,
       comments: [],
@@ -108,46 +108,87 @@ export default function CreateScreen({ onPost }) {
           </div>
         </Section>
 
-        {/* Photo picker */}
+        {/* Photo upload */}
         <Section title="Photo">
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 6,
-          }}>
-            {PLACEHOLDER_IMAGES.map((src, i) => (
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+          />
+          {imageUrl ? (
+            <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', aspectRatio: '4/3' }}>
+              <img src={imageUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               <button
-                key={i}
-                onClick={() => setSelectedImg(i)}
+                onClick={() => { setImageUrl(null); fileRef.current.value = '' }}
                 style={{
-                  aspectRatio: '1',
-                  borderRadius: 10,
-                  overflow: 'hidden',
-                  border: `2.5px solid ${selectedImg === i ? '#2d5a27' : 'transparent'}`,
-                  padding: 0,
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  width: 30,
+                  height: 30,
+                  borderRadius: '50%',
+                  background: 'rgba(0,0,0,.55)',
+                  color: '#fff',
+                  fontSize: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: 'none',
                   cursor: 'pointer',
-                  background: 'none',
-                  position: 'relative',
+                }}
+              >✕</button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => fileRef.current.click()}
+                style={{
+                  flex: 1,
+                  padding: '18px 0',
+                  borderRadius: 14,
+                  border: '2px dashed #d4edcf',
+                  background: '#f5fbf4',
+                  color: '#2d5a27',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 6,
                 }}
               >
-                <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                {selectedImg === i && (
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'rgba(45,90,39,.25)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 20,
-                  }}>✓</div>
-                )}
+                <span style={{ fontSize: 28 }}>🖼️</span>
+                Choose Photo
               </button>
-            ))}
-          </div>
-          <p style={{ fontSize: 12, color: '#78716c', marginTop: 8 }}>
-            Using sample photos — upload from camera roll coming soon
-          </p>
+              <button
+                onClick={() => {
+                  fileRef.current.setAttribute('capture', 'environment')
+                  fileRef.current.click()
+                }}
+                style={{
+                  flex: 1,
+                  padding: '18px 0',
+                  borderRadius: 14,
+                  border: '2px dashed #d4edcf',
+                  background: '#f5fbf4',
+                  color: '#2d5a27',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <span style={{ fontSize: 28 }}>📷</span>
+                Camera
+              </button>
+            </div>
+          )}
         </Section>
 
         {/* Caption */}
@@ -279,9 +320,6 @@ export default function CreateScreen({ onPost }) {
           🌿 Share with Canopy
         </button>
 
-        <p style={{ textAlign: 'center', fontSize: 12, color: '#c4b5ab', marginTop: 10, lineHeight: 1.5 }}>
-          Posts are community content and do not constitute medical or legal advice. 21+ / medical patients only.
-        </p>
       </div>
     </div>
   )

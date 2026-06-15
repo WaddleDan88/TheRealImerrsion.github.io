@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import AgeGate from './components/AgeGate'
 import BottomNav from './components/BottomNav'
 import FeedScreen from './screens/FeedScreen'
 import ExploreScreen from './screens/ExploreScreen'
@@ -9,13 +8,10 @@ import ProfileScreen from './screens/ProfileScreen'
 import { POSTS, USERS } from './data/mockData'
 
 export default function App() {
-  const [ageConfirmed, setAgeConfirmed] = useState(false)
   const [activeTab, setActiveTab] = useState('home')
   const [posts, setPosts] = useState(POSTS)
   const [savedIds, setSavedIds] = useState(new Set())
   const [likedIds, setLikedIds] = useState(new Set())
-
-  if (!ageConfirmed) return <AgeGate onConfirm={() => setAgeConfirmed(true)} />
 
   function toggleLike(postId) {
     setLikedIds(prev => {
